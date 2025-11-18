@@ -1,0 +1,39 @@
+# Dependencies
+/vendor/
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Runtime
+/var/cache/*
+/var/logs/*
+/var/data/*
+!/var/cache/.gitkeep
+!/var/logs/.gitkeep
+!/var/data/.gitkeep
+
+# Build
+/node_modules/
+/public/ui/dist/
+
+# Testing
+/coverage/
+.phpunit.result.cache
+.phpunit.cache/
+infection.log
+
+# Composer
+composer.lock
