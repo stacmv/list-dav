@@ -7,30 +7,23 @@
     <script src="https://unpkg.com/htmx.org@1.9.10"></script>
     <script defer src="https://unpkg.com/alpinejs@3.13.3/dist/cdn.min.js"></script>
     <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
-
+        * { box-sizing: border-box; margin: 0; padding: 0; }
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background: #1e1e1e;
             color: #d4d4d4;
             height: 100vh;
             display: flex;
             flex-direction: column;
         }
-
-        /* Toolbar */
         .toolbar {
             background: #333;
             padding: 8px 16px;
             display: flex;
             gap: 8px;
             border-bottom: 1px solid #444;
+            flex-wrap: wrap;
         }
-
         .toolbar button {
             background: #0e639c;
             color: white;
@@ -40,55 +33,11 @@
             cursor: pointer;
             font-size: 12px;
         }
-
-        .toolbar button:hover {
-            background: #1177bb;
-        }
-
-        .toolbar button:disabled {
-            background: #555;
-            cursor: not-allowed;
-        }
-
-        .toolbar .shortcut {
-            color: #888;
-            font-size: 10px;
-            margin-left: 4px;
-        }
-
-        /* Main panels */
-        .panels {
-            flex: 1;
-            display: flex;
-            overflow: hidden;
-        }
-
-        .panel {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            border-right: 1px solid #444;
-        }
-
-        .panel:last-child {
-            border-right: none;
-        }
-
-        .panel.active {
-            background: #252526;
-        }
-
-        .path-bar {
-            background: #3c3c3c;
-            padding: 8px 12px;
-            font-size: 12px;
-            border-bottom: 1px solid #444;
-            display: flex;
-            align-items: center;
-        }
-
-        .path-bar input {
-            flex: 1;
+        .toolbar button:hover { background: #1177bb; }
+        .toolbar button:disabled { background: #555; cursor: not-allowed; opacity: 0.6; }
+        .toolbar .shortcut { color: rgba(255,255,255,0.6); font-size: 10px; margin-left: 4px; }
+        .toolbar .spacer { flex: 1; }
+        .toolbar input {
             background: #1e1e1e;
             border: 1px solid #444;
             color: #d4d4d4;
@@ -96,12 +45,39 @@
             border-radius: 3px;
             font-size: 12px;
         }
-
-        .file-list {
+        .panels { flex: 1; display: flex; overflow: hidden; }
+        .panel {
             flex: 1;
-            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            border-right: 1px solid #444;
         }
-
+        .panel:last-child { border-right: none; }
+        .panel.active .path-bar { background: #094771; }
+        .path-bar {
+            background: #3c3c3c;
+            padding: 8px 12px;
+            font-size: 12px;
+            border-bottom: 1px solid #444;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .path-bar input { flex: 1; background: #1e1e1e; border: 1px solid #444; color: #d4d4d4; padding: 4px 8px; border-radius: 3px; }
+        .path-bar button { background: #444; border: none; color: #d4d4d4; padding: 4px 8px; border-radius: 3px; cursor: pointer; }
+        .path-bar button:hover { background: #555; }
+        .file-list { flex: 1; overflow-y: auto; }
+        .file-header {
+            display: flex;
+            padding: 6px 12px;
+            background: #2d2d2d;
+            border-bottom: 1px solid #444;
+            font-size: 11px;
+            color: #888;
+        }
+        .col-name { flex: 1; }
+        .col-size { width: 80px; text-align: right; }
+        .col-date { width: 130px; text-align: right; }
         .file-item {
             display: flex;
             align-items: center;
@@ -109,43 +85,14 @@
             cursor: pointer;
             border-bottom: 1px solid #2d2d2d;
         }
-
-        .file-item:hover {
-            background: #2a2d2e;
-        }
-
-        .file-item.selected {
-            background: #094771;
-        }
-
-        .file-item .icon {
-            width: 20px;
-            margin-right: 8px;
-            text-align: center;
-        }
-
-        .file-item .name {
-            flex: 1;
-            font-size: 13px;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        .file-item .size {
-            font-size: 11px;
-            color: #888;
-            margin-left: 8px;
-        }
-
-        .file-item .date {
-            font-size: 11px;
-            color: #888;
-            margin-left: 8px;
-            width: 120px;
-        }
-
-        /* Status bar */
+        .file-item:hover { background: #2a2d2e; }
+        .file-item.selected { background: #094771; }
+        .file-item .icon { width: 20px; margin-right: 8px; text-align: center; }
+        .file-item .name { flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 13px; }
+        .file-item .size { width: 80px; text-align: right; font-size: 11px; color: #888; }
+        .file-item .date { width: 130px; text-align: right; font-size: 11px; color: #888; }
+        .loading, .error-msg, .empty { text-align: center; padding: 20px; color: #888; }
+        .error-msg { color: #f44; }
         .status-bar {
             background: #007acc;
             padding: 4px 12px;
@@ -153,33 +100,22 @@
             display: flex;
             justify-content: space-between;
         }
-
-        /* Modal */
         .modal-overlay {
             position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
+            inset: 0;
             background: rgba(0,0,0,0.7);
             display: flex;
             align-items: center;
             justify-content: center;
             z-index: 1000;
         }
-
         .modal {
             background: #2d2d2d;
             border-radius: 8px;
             padding: 20px;
             min-width: 400px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
         }
-
-        .modal h3 {
-            margin-bottom: 16px;
-        }
-
+        .modal h3 { margin-bottom: 16px; }
         .modal input {
             width: 100%;
             padding: 8px;
@@ -189,335 +125,281 @@
             border-radius: 4px;
             margin-bottom: 16px;
         }
-
-        .modal-buttons {
-            display: flex;
-            justify-content: flex-end;
-            gap: 8px;
-        }
-
-        .modal-buttons button {
-            padding: 8px 16px;
+        .modal-btns { display: flex; justify-content: flex-end; gap: 8px; }
+        .modal-btns button { padding: 8px 16px; border-radius: 4px; cursor: pointer; border: none; }
+        .modal-btns .cancel { background: #444; color: #d4d4d4; }
+        .modal-btns .confirm { background: #0e639c; color: white; }
+        .modal-btns .danger { background: #c00; color: white; }
+        .toast-box { position: fixed; bottom: 40px; right: 20px; z-index: 1001; }
+        .toast {
+            background: #333;
+            color: #fff;
+            padding: 12px 20px;
             border-radius: 4px;
-            cursor: pointer;
+            margin-top: 8px;
+            animation: slideIn 0.3s ease;
         }
-
-        .modal-buttons .cancel {
-            background: #444;
-            color: #d4d4d4;
-            border: none;
-        }
-
-        .modal-buttons .confirm {
-            background: #0e639c;
-            color: white;
-            border: none;
-        }
-
-        /* Responsive */
+        .toast.success { border-left: 4px solid #4caf50; }
+        .toast.error { border-left: 4px solid #f44336; }
+        @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+        [x-cloak] { display: none !important; }
         @media (max-width: 768px) {
-            .panels {
-                flex-direction: column;
-            }
-
-            .panel {
-                display: none;
-                border-right: none;
-                border-bottom: 1px solid #444;
-            }
-
-            .panel.active {
-                display: flex;
-            }
+            .panels { flex-direction: column; }
+            .panel { display: none; }
+            .panel.active { display: flex; }
+            .col-date { display: none; }
         }
     </style>
 </head>
-<body x-data="fileManager()">
-    <!-- Toolbar -->
+<body x-data="fm()" x-init="init()">
     <div class="toolbar">
-        <button @click="refresh()" title="Refresh">
-            ↻ Refresh
-        </button>
-        <button @click="copy()" :disabled="!hasSelection" title="Copy">
-            Copy <span class="shortcut">F5</span>
-        </button>
-        <button @click="move()" :disabled="!hasSelection" title="Move">
-            Move <span class="shortcut">F6</span>
-        </button>
-        <button @click="showNewFolderModal()" title="New Folder">
-            New Folder <span class="shortcut">F7</span>
-        </button>
-        <button @click="deleteSelected()" :disabled="!hasSelection" title="Delete">
-            Delete <span class="shortcut">F8</span>
-        </button>
-        <button @click="showRenameModal()" :disabled="selectedItems.length !== 1" title="Rename">
-            Rename
-        </button>
+        <button @click="refresh()">↻ Refresh</button>
+        <button @click="goUp()" :disabled="currentPath==='/'">↑ Up</button>
+        <button @click="modal='copy'" :disabled="!sel.length">Copy <span class="shortcut">F5</span></button>
+        <button @click="modal='move'" :disabled="!sel.length">Move <span class="shortcut">F6</span></button>
+        <button @click="modal='mkdir'">New Folder <span class="shortcut">F7</span></button>
+        <button @click="modal='delete'" :disabled="!sel.length">Delete <span class="shortcut">F8</span></button>
+        <button @click="modal='rename'" :disabled="sel.length!==1">Rename</button>
+        <div class="spacer"></div>
+        <input type="text" placeholder="Search..." x-model="searchQ" @keydown.enter="search()">
     </div>
 
-    <!-- Panels -->
     <div class="panels">
-        <!-- Left Panel -->
-        <div class="panel" :class="{ 'active': activePanel === 'left' }" @click="activePanel = 'left'">
+        <div class="panel" :class="{active:ap==='left'}" @click="ap='left'">
             <div class="path-bar">
-                <input type="text" x-model="leftPath" @keydown.enter="navigate('left', leftPath)">
+                <button @click="goUp('left')" :disabled="lPath==='/'">↑</button>
+                <input x-model="lPath" @keydown.enter="nav('left',lPath)">
             </div>
+            <div class="file-header"><span class="col-name">Name</span><span class="col-size">Size</span><span class="col-date">Modified</span></div>
             <div class="file-list">
-                <template x-for="item in leftItems" :key="item.path">
-                    <div class="file-item"
-                         :class="{ 'selected': isSelected('left', item) }"
-                         @click="selectItem('left', item, $event)"
-                         @dblclick="open('left', item)">
-                        <span class="icon" x-text="item.isDir ? '📁' : '📄'"></span>
-                        <span class="name" x-text="item.name"></span>
-                        <span class="size" x-text="item.isDir ? '' : formatSize(item.size)"></span>
+                <template x-if="lLoad"><div class="loading">Loading...</div></template>
+                <template x-if="lErr"><div class="error-msg" x-text="lErr"></div></template>
+                <template x-if="!lLoad && !lErr && !lItems.length"><div class="empty">Empty</div></template>
+                <template x-if="!lLoad && !lErr && lPath!=='/'">
+                    <div class="file-item" @dblclick="goUp('left')"><span class="icon">📁</span><span class="name">..</span><span class="size"></span><span class="date"></span></div>
+                </template>
+                <template x-for="i in lItems" :key="i.path">
+                    <div class="file-item" :class="{selected:isSel('left',i)}" @click="selItem('left',i,$event)" @dblclick="open('left',i)">
+                        <span class="icon" x-text="i.isDir?'📁':'📄'"></span>
+                        <span class="name" x-text="i.name"></span>
+                        <span class="size" x-text="i.isDir?'':fmtSize(i.size)"></span>
+                        <span class="date" x-text="fmtDate(i.modified)"></span>
                     </div>
                 </template>
             </div>
         </div>
 
-        <!-- Right Panel -->
-        <div class="panel" :class="{ 'active': activePanel === 'right' }" @click="activePanel = 'right'">
+        <div class="panel" :class="{active:ap==='right'}" @click="ap='right'">
             <div class="path-bar">
-                <input type="text" x-model="rightPath" @keydown.enter="navigate('right', rightPath)">
+                <button @click="goUp('right')" :disabled="rPath==='/'">↑</button>
+                <input x-model="rPath" @keydown.enter="nav('right',rPath)">
             </div>
+            <div class="file-header"><span class="col-name">Name</span><span class="col-size">Size</span><span class="col-date">Modified</span></div>
             <div class="file-list">
-                <template x-for="item in rightItems" :key="item.path">
-                    <div class="file-item"
-                         :class="{ 'selected': isSelected('right', item) }"
-                         @click="selectItem('right', item, $event)"
-                         @dblclick="open('right', item)">
-                        <span class="icon" x-text="item.isDir ? '📁' : '📄'"></span>
-                        <span class="name" x-text="item.name"></span>
-                        <span class="size" x-text="item.isDir ? '' : formatSize(item.size)"></span>
+                <template x-if="rLoad"><div class="loading">Loading...</div></template>
+                <template x-if="rErr"><div class="error-msg" x-text="rErr"></div></template>
+                <template x-if="!rLoad && !rErr && !rItems.length"><div class="empty">Empty</div></template>
+                <template x-if="!rLoad && !rErr && rPath!=='/'">
+                    <div class="file-item" @dblclick="goUp('right')"><span class="icon">📁</span><span class="name">..</span><span class="size"></span><span class="date"></span></div>
+                </template>
+                <template x-for="i in rItems" :key="i.path">
+                    <div class="file-item" :class="{selected:isSel('right',i)}" @click="selItem('right',i,$event)" @dblclick="open('right',i)">
+                        <span class="icon" x-text="i.isDir?'📁':'📄'"></span>
+                        <span class="name" x-text="i.name"></span>
+                        <span class="size" x-text="i.isDir?'':fmtSize(i.size)"></span>
+                        <span class="date" x-text="fmtDate(i.modified)"></span>
                     </div>
                 </template>
             </div>
         </div>
     </div>
 
-    <!-- Status Bar -->
     <div class="status-bar">
-        <span x-text="selectedItems.length + ' selected'"></span>
+        <span x-text="sel.length?sel.length+' selected':'Ready'"></span>
         <span>ListDAV v1.0.0</span>
     </div>
 
-    <!-- New Folder Modal -->
-    <div class="modal-overlay" x-show="showModal === 'newFolder'" @click.self="showModal = null">
+    <!-- Modals -->
+    <div class="modal-overlay" x-show="modal==='mkdir'" x-cloak @click.self="modal=null">
         <div class="modal">
             <h3>New Folder</h3>
-            <input type="text" x-model="newFolderName" placeholder="Folder name" @keydown.enter="createFolder()">
-            <div class="modal-buttons">
-                <button class="cancel" @click="showModal = null">Cancel</button>
-                <button class="confirm" @click="createFolder()">Create</button>
+            <input type="text" x-model="mkdirName" placeholder="Folder name" @keydown.enter="mkdir()" x-ref="mkdirIn">
+            <div class="modal-btns">
+                <button class="cancel" @click="modal=null">Cancel</button>
+                <button class="confirm" @click="mkdir()">Create</button>
             </div>
         </div>
     </div>
 
-    <!-- Rename Modal -->
-    <div class="modal-overlay" x-show="showModal === 'rename'" @click.self="showModal = null">
+    <div class="modal-overlay" x-show="modal==='rename'" x-cloak @click.self="modal=null">
         <div class="modal">
             <h3>Rename</h3>
-            <input type="text" x-model="renameValue" @keydown.enter="rename()">
-            <div class="modal-buttons">
-                <button class="cancel" @click="showModal = null">Cancel</button>
+            <input type="text" x-model="renameVal" @keydown.enter="rename()" x-ref="renameIn">
+            <div class="modal-btns">
+                <button class="cancel" @click="modal=null">Cancel</button>
                 <button class="confirm" @click="rename()">Rename</button>
             </div>
         </div>
     </div>
 
+    <div class="modal-overlay" x-show="modal==='delete'" x-cloak @click.self="modal=null">
+        <div class="modal">
+            <h3>Delete</h3>
+            <p style="margin-bottom:16px">Delete <span x-text="sel.length"></span> item(s)?</p>
+            <div class="modal-btns">
+                <button class="cancel" @click="modal=null">Cancel</button>
+                <button class="danger" @click="del()">Delete</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" x-show="modal==='copy'||modal==='move'" x-cloak @click.self="modal=null">
+        <div class="modal">
+            <h3 x-text="modal==='copy'?'Copy':'Move'"></h3>
+            <p style="margin-bottom:16px"><span x-text="sel.length"></span> item(s) → <span x-text="otherPath()"></span></p>
+            <div class="modal-btns">
+                <button class="cancel" @click="modal=null">Cancel</button>
+                <button class="confirm" @click="modal==='copy'?copy():move()" x-text="modal==='copy'?'Copy':'Move'"></button>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast-box" x-ref="toasts"></div>
+
     <script>
-        function fileManager() {
-            return {
-                activePanel: 'left',
-                leftPath: '/',
-                rightPath: '/youtube/playlists',
-                leftItems: [],
-                rightItems: [],
-                selectedItems: [],
-                showModal: null,
-                newFolderName: '',
-                renameValue: '',
+    function fm(){return{
+        ap:'left',lPath:'/',rPath:'/',lItems:[],rItems:[],lLoad:false,rLoad:false,lErr:null,rErr:null,
+        sel:[],selPanel:null,modal:null,mkdirName:'',renameVal:'',searchQ:'',csrf:'',
 
-                get hasSelection() {
-                    return this.selectedItems.length > 0;
-                },
+        get currentPath(){return this.ap==='left'?this.lPath:this.rPath},
 
-                init() {
-                    this.loadDemo();
-                    this.setupKeyboard();
-                },
+        init(){
+            const m=document.querySelector('meta[name="csrf-token"]');
+            if(m)this.csrf=m.content;
+            this.nav('left','/');
+            this.nav('right','/youtube/playlists');
+            document.addEventListener('keydown',e=>{
+                if(this.modal)return;
+                if(e.key==='Tab'){e.preventDefault();this.ap=this.ap==='left'?'right':'left'}
+                if(e.key==='F5'&&this.sel.length){e.preventDefault();this.modal='copy'}
+                if(e.key==='F6'&&this.sel.length){e.preventDefault();this.modal='move'}
+                if(e.key==='F7'){e.preventDefault();this.modal='mkdir'}
+                if((e.key==='F8'||e.key==='Delete')&&this.sel.length){e.preventDefault();this.modal='delete'}
+                if(e.key==='Backspace'){e.preventDefault();this.goUp()}
+                if(e.ctrlKey&&e.key==='a'){e.preventDefault();this.selAll()}
+            });
+        },
 
-                loadDemo() {
-                    // Demo data
-                    this.leftItems = [
-                        { name: 'youtube', path: '/youtube', isDir: true, size: 0 },
-                        { name: 'views', path: '/views', isDir: true, size: 0 },
-                        { name: 'trash', path: '/trash', isDir: true, size: 0 },
-                    ];
+        async nav(p,path){
+            if(p==='left'){this.lPath=path;this.lLoad=true;this.lErr=null}
+            else{this.rPath=path;this.rLoad=true;this.rErr=null}
+            try{
+                const r=await fetch('/ui/api/browse?path='+encodeURIComponent(path));
+                const d=await r.json();
+                if(d.success){if(p==='left')this.lItems=d.items;else this.rItems=d.items}
+                else{if(p==='left')this.lErr=d.error;else this.rErr=d.error}
+            }catch(e){if(p==='left')this.lErr='Network error';else this.rErr='Network error'}
+            if(p==='left')this.lLoad=false;else this.rLoad=false;
+            if(this.selPanel===p){this.sel=[];this.selPanel=null}
+        },
 
-                    this.rightItems = [
-                        { name: 'Music', path: '/youtube/playlists/Music', isDir: true, size: 0 },
-                        { name: 'Tutorials', path: '/youtube/playlists/Tutorials', isDir: true, size: 0 },
-                        { name: 'Watch Later', path: '/youtube/playlists/Watch Later', isDir: true, size: 0 },
-                    ];
-                },
+        refresh(p){p=p||this.ap;this.nav(p,p==='left'?this.lPath:this.rPath)},
+        goUp(p){p=p||this.ap;const cp=p==='left'?this.lPath:this.rPath;if(cp==='/')return;this.nav(p,cp.split('/').slice(0,-1).join('/')||'/')},
+        otherPath(){return this.ap==='left'?this.rPath:this.lPath},
 
-                setupKeyboard() {
-                    document.addEventListener('keydown', (e) => {
-                        if (this.showModal) return;
+        selItem(p,i,e){
+            if(this.selPanel!==p){this.sel=[];this.selPanel=p}
+            if(e.ctrlKey){const x=this.sel.findIndex(s=>s.path===i.path);if(x>=0)this.sel.splice(x,1);else this.sel.push(i)}
+            else this.sel=[i];
+            this.ap=p;
+        },
+        isSel(p,i){return this.selPanel===p&&this.sel.some(s=>s.path===i.path)},
+        selAll(){const items=this.ap==='left'?this.lItems:this.rItems;this.sel=[...items];this.selPanel=this.ap},
 
-                        switch(e.key) {
-                            case 'Tab':
-                                e.preventDefault();
-                                this.switchPanel();
-                                break;
-                            case 'F5':
-                                e.preventDefault();
-                                this.copy();
-                                break;
-                            case 'F6':
-                                e.preventDefault();
-                                this.move();
-                                break;
-                            case 'F7':
-                                e.preventDefault();
-                                this.showNewFolderModal();
-                                break;
-                            case 'F8':
-                            case 'Delete':
-                                e.preventDefault();
-                                this.deleteSelected();
-                                break;
-                            case 'Enter':
-                                if (this.selectedItems.length === 1) {
-                                    this.open(this.activePanel, this.selectedItems[0]);
-                                }
-                                break;
-                            case ' ':
-                                e.preventDefault();
-                                // Toggle selection
-                                break;
-                            case 'a':
-                                if (e.ctrlKey) {
-                                    e.preventDefault();
-                                    this.selectAll();
-                                }
-                                break;
-                        }
-                    });
-                },
+        open(p,i){
+            if(i.isDir)this.nav(p,i.path);
+            else if(i.name.endsWith('.url'))this.openUrl(i.path);
+        },
+        async openUrl(path){
+            try{
+                const r=await fetch('/ui/api/file?path='+encodeURIComponent(path));
+                const d=await r.json();
+                if(d.success){const m=d.content.match(/URL=(.+)/);if(m)window.open(m[1].trim(),'_blank')}
+            }catch(e){}
+        },
 
-                switchPanel() {
-                    this.activePanel = this.activePanel === 'left' ? 'right' : 'left';
-                },
+        async mkdir(){
+            if(!this.mkdirName)return;
+            const path=this.ap==='left'?this.lPath:this.rPath;
+            try{
+                const r=await fetch('/ui/api/mkdir',{method:'POST',headers:{'Content-Type':'application/json','X-CSRF-Token':this.csrf},body:JSON.stringify({path,name:this.mkdirName})});
+                const d=await r.json();
+                if(d.success){this.toast('Folder created','success');this.refresh()}else this.toast(d.error,'error');
+            }catch(e){this.toast('Error','error')}
+            this.modal=null;this.mkdirName='';
+        },
 
-                navigate(panel, path) {
-                    // Load contents from WebDAV
-                    console.log('Navigate', panel, path);
-                },
+        async rename(){
+            if(!this.renameVal||this.sel.length!==1)return;
+            try{
+                const r=await fetch('/ui/api/rename',{method:'POST',headers:{'Content-Type':'application/json','X-CSRF-Token':this.csrf},body:JSON.stringify({path:this.sel[0].path,newName:this.renameVal})});
+                const d=await r.json();
+                if(d.success){this.toast('Renamed','success');this.sel=[];this.refresh()}else this.toast(d.error,'error');
+            }catch(e){this.toast('Error','error')}
+            this.modal=null;
+        },
 
-                selectItem(panel, item, event) {
-                    if (event.ctrlKey) {
-                        const index = this.selectedItems.findIndex(i => i.path === item.path);
-                        if (index >= 0) {
-                            this.selectedItems.splice(index, 1);
-                        } else {
-                            this.selectedItems.push(item);
-                        }
-                    } else {
-                        this.selectedItems = [item];
-                    }
-                    this.activePanel = panel;
-                },
+        async copy(){
+            const dest=this.otherPath();
+            try{
+                const r=await fetch('/ui/api/copy',{method:'POST',headers:{'Content-Type':'application/json','X-CSRF-Token':this.csrf},body:JSON.stringify({sources:this.sel.map(s=>s.path),destination:dest})});
+                const d=await r.json();
+                if(d.success){this.toast('Copied','success');this.refresh('left');this.refresh('right')}else this.toast(d.error,'error');
+            }catch(e){this.toast('Error','error')}
+            this.modal=null;
+        },
 
-                isSelected(panel, item) {
-                    return this.selectedItems.some(i => i.path === item.path);
-                },
+        async move(){
+            const dest=this.otherPath();
+            try{
+                const r=await fetch('/ui/api/move',{method:'POST',headers:{'Content-Type':'application/json','X-CSRF-Token':this.csrf},body:JSON.stringify({sources:this.sel.map(s=>s.path),destination:dest})});
+                const d=await r.json();
+                if(d.success){this.toast('Moved','success');this.sel=[];this.refresh('left');this.refresh('right')}else this.toast(d.error,'error');
+            }catch(e){this.toast('Error','error')}
+            this.modal=null;
+        },
 
-                open(panel, item) {
-                    if (item.isDir) {
-                        if (panel === 'left') {
-                            this.leftPath = item.path;
-                        } else {
-                            this.rightPath = item.path;
-                        }
-                        this.navigate(panel, item.path);
-                    } else {
-                        // Open file
-                        window.open(item.path, '_blank');
-                    }
-                },
+        async del(){
+            try{
+                const r=await fetch('/ui/api/delete',{method:'POST',headers:{'Content-Type':'application/json','X-CSRF-Token':this.csrf},body:JSON.stringify({paths:this.sel.map(s=>s.path)})});
+                const d=await r.json();
+                if(d.success){this.toast('Deleted','success');this.sel=[];this.refresh()}else this.toast(d.error,'error');
+            }catch(e){this.toast('Error','error')}
+            this.modal=null;
+        },
 
-                selectAll() {
-                    const items = this.activePanel === 'left' ? this.leftItems : this.rightItems;
-                    this.selectedItems = [...items];
-                },
-
-                refresh() {
-                    this.navigate('left', this.leftPath);
-                    this.navigate('right', this.rightPath);
-                },
-
-                copy() {
-                    if (!this.hasSelection) return;
-                    const dest = this.activePanel === 'left' ? this.rightPath : this.leftPath;
-                    console.log('Copy', this.selectedItems, 'to', dest);
-                    alert('Copy operation: ' + this.selectedItems.map(i => i.name).join(', ') + ' to ' + dest);
-                },
-
-                move() {
-                    if (!this.hasSelection) return;
-                    const dest = this.activePanel === 'left' ? this.rightPath : this.leftPath;
-                    console.log('Move', this.selectedItems, 'to', dest);
-                    alert('Move operation: ' + this.selectedItems.map(i => i.name).join(', ') + ' to ' + dest);
-                },
-
-                deleteSelected() {
-                    if (!this.hasSelection) return;
-                    if (confirm('Delete ' + this.selectedItems.length + ' item(s)?')) {
-                        console.log('Delete', this.selectedItems);
-                        this.selectedItems = [];
-                    }
-                },
-
-                showNewFolderModal() {
-                    this.newFolderName = '';
-                    this.showModal = 'newFolder';
-                },
-
-                createFolder() {
-                    if (this.newFolderName) {
-                        const path = this.activePanel === 'left' ? this.leftPath : this.rightPath;
-                        console.log('Create folder', this.newFolderName, 'in', path);
-                        alert('Created folder: ' + this.newFolderName);
-                        this.showModal = null;
-                    }
-                },
-
-                showRenameModal() {
-                    if (this.selectedItems.length === 1) {
-                        this.renameValue = this.selectedItems[0].name;
-                        this.showModal = 'rename';
-                    }
-                },
-
-                rename() {
-                    if (this.renameValue && this.selectedItems.length === 1) {
-                        console.log('Rename', this.selectedItems[0].path, 'to', this.renameValue);
-                        alert('Renamed to: ' + this.renameValue);
-                        this.showModal = null;
-                    }
-                },
-
-                formatSize(bytes) {
-                    if (bytes === 0) return '';
-                    const units = ['B', 'KB', 'MB', 'GB'];
-                    const i = Math.floor(Math.log(bytes) / Math.log(1024));
-                    return (bytes / Math.pow(1024, i)).toFixed(1) + ' ' + units[i];
+        async search(){
+            if(!this.searchQ)return;
+            try{
+                const r=await fetch('/ui/api/search?q='+encodeURIComponent(this.searchQ)+'&path='+encodeURIComponent(this.currentPath));
+                const d=await r.json();
+                if(d.success){
+                    if(this.ap==='left')this.lItems=d.results;else this.rItems=d.results;
+                    this.toast('Found '+d.results.length,'success');
                 }
-            };
+            }catch(e){}
+        },
+
+        fmtSize(b){if(!b)return'';const u=['B','KB','MB','GB'];let i=0;while(b>=1024&&i<3){b/=1024;i++}return b.toFixed(i?1:0)+' '+u[i]},
+        fmtDate(d){return d?d.substring(0,16).replace('T',' '):''},
+        toast(msg,type){
+            const t=document.createElement('div');
+            t.className='toast '+type;
+            t.textContent=msg;
+            this.$refs.toasts.appendChild(t);
+            setTimeout(()=>t.remove(),3000);
         }
+    }}
     </script>
 </body>
 </html>

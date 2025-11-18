@@ -474,6 +474,195 @@ composer dump-autoload
 
 ---
 
+## Web UI Testing
+
+The Web UI is a dual-panel file manager accessible at `http://127.0.0.1:8080/ui/`
+
+### Test 14: Access Web UI
+
+1. Open browser to `http://127.0.0.1:8080/ui/`
+
+**Expected:** Dual-panel file manager loads with:
+- Left panel showing root directory (/)
+- Right panel showing `/youtube/playlists`
+- Toolbar with buttons: Refresh, Up, Copy, Move, New Folder, Delete, Rename
+- Status bar at bottom
+
+### Test 15: Navigate Directories
+
+1. Double-click on `youtube` folder in left panel
+2. Double-click on `playlists` folder
+3. Double-click on any playlist folder
+
+**Expected:**
+- Path bar updates to show current path
+- Files and folders load in the panel
+- Parent directory (..) appears when not at root
+
+### Test 16: Keyboard Navigation
+
+1. Press `Tab` to switch between panels
+2. Click on a file to select it
+3. Press `Ctrl+A` to select all
+4. Press `Backspace` to go up one directory
+
+**Expected:**
+- Active panel indicator changes (blue path bar)
+- Selection works correctly
+- All items become selected with Ctrl+A
+
+### Test 17: Copy Files via UI
+
+1. In left panel, navigate to `/youtube/playlists/Music`
+2. In right panel, navigate to `/youtube/playlists/Tutorials`
+3. Select a video file in left panel
+4. Click "Copy" button (or press F5)
+5. Confirm in modal dialog
+
+**Expected:**
+- Copy modal appears showing source and destination
+- After confirm, toast notification shows "Copied"
+- File appears in both panels
+
+### Test 18: Move Files via UI
+
+1. Select a file in one panel
+2. Click "Move" button (or press F6)
+3. Confirm in modal dialog
+
+**Expected:**
+- Move modal appears
+- After confirm, file moves to other panel's location
+- File disappears from source, appears in destination
+
+### Test 19: Delete Files via UI
+
+1. Select one or more files
+2. Click "Delete" button (or press F8/Delete key)
+3. Confirm in modal dialog
+
+**Expected:**
+- Delete confirmation modal appears
+- After confirm, files are removed
+- Toast notification shows "Deleted"
+
+### Test 20: Create New Folder
+
+1. Click "New Folder" button (or press F7)
+2. Enter folder name in modal
+3. Click Create
+
+**Expected:**
+- Modal appears with text input
+- New folder appears in current directory
+- Toast notification shows "Folder created"
+
+### Test 21: Rename Files
+
+1. Select exactly one file
+2. Click "Rename" button
+3. Change the name in modal
+4. Click Rename
+
+**Expected:**
+- Rename modal appears with current name
+- After confirm, file shows new name
+- Toast notification shows "Renamed"
+
+### Test 22: Open Video Files
+
+1. Navigate to a playlist with videos
+2. Double-click on a `.url` file
+
+**Expected:**
+- YouTube video opens in new browser tab
+
+### Test 23: Search Files
+
+1. Type a search term in the search box
+2. Press Enter
+
+**Expected:**
+- Current panel shows search results
+- Toast shows number of results found
+
+### Test 24: Multi-Select Operations
+
+1. Click first file
+2. Ctrl+click additional files to add to selection
+3. Or Shift+click to select range
+4. Perform Copy/Move/Delete
+
+**Expected:**
+- Multiple files can be selected
+- Status bar shows selection count
+- Operations apply to all selected files
+
+### Test 25: Responsive Design (Mobile)
+
+1. Resize browser window to mobile width (< 768px)
+
+**Expected:**
+- Single panel view (only active panel visible)
+- Tab switches between panels
+- Date column hidden to save space
+
+### Test 26: Error Handling
+
+1. Try to navigate to invalid path (e.g., `/nonexistent`)
+2. Try to delete a file that doesn't exist
+
+**Expected:**
+- Error message displays in panel
+- Error toast notifications for failed operations
+
+### Test 27: CSRF Protection
+
+1. Open browser developer tools (F12)
+2. Check Network tab during POST operations
+3. Verify `X-CSRF-Token` header is sent
+
+**Expected:**
+- All POST requests include CSRF token
+- Operations without valid token are rejected
+
+### Web UI Keyboard Shortcuts Reference
+
+| Key | Action |
+|-----|--------|
+| Tab | Switch panels |
+| F5 | Copy |
+| F6 | Move |
+| F7 | New Folder |
+| F8 / Delete | Delete |
+| Backspace | Go up |
+| Ctrl+A | Select all |
+| Enter | Open selected |
+| Click | Select item |
+| Ctrl+Click | Add to selection |
+| Shift+Click | Range select |
+
+### Web UI Test Checklist
+
+- [ ] UI loads correctly
+- [ ] Navigation works in both panels
+- [ ] All toolbar buttons functional
+- [ ] All keyboard shortcuts work
+- [ ] Copy operation works
+- [ ] Move operation works
+- [ ] Delete operation works
+- [ ] New folder creation works
+- [ ] Rename operation works
+- [ ] Video files open in YouTube
+- [ ] Search returns results
+- [ ] Multi-select works
+- [ ] Responsive design works
+- [ ] Error messages display
+- [ ] Toast notifications appear
+- [ ] CSRF protection active
+
+---
+
 ## Next Steps
 
 After manual testing:
