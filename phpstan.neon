@@ -1,0 +1,10 @@
+parameters:
+    level: 9
+    paths:
+        - src
+        - modules
+    excludePaths:
+        - vendor
+    checkMissingIterableValueType: true
+    checkGenericClassInNonGenericObjectType: true
+    reportUnmatchedIgnoredErrors: false
