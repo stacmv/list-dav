@@ -4,6 +4,7 @@ FROM php:8.3-fpm-alpine
 RUN apk add --no-cache \
     nginx \
     sqlite \
+    sqlite-dev \
     supervisor \
     && docker-php-ext-install pdo_sqlite
 
